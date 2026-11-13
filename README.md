@@ -22,25 +22,53 @@ A simple, polished desktop study planner built with **Python and Tkinter**. Crea
 - Python 3.10 or newer.
 - Tkinter, which is included with most standard Python installations. On some Linux distributions it must be installed separately (for example, the `python3-tk` package).
 
-## Run the application
+## Run on Windows
 
-1. Download or clone this repository.
-2. Open the project folder in a terminal.
-3. Run:
+Open PowerShell in the project folder:
 
-```bash
+```powershell
+py -m venv .venv
+.venv\\Scripts\\Activate.ps1
 python main.py
 ```
 
-On some Linux systems, use `python3 main.py`.
+If PowerShell blocks activation, use Command Prompt:
+
+```bat
+py -m venv .venv
+.venv\\Scripts\\activate.bat
+python main.py
+```
+
+No third-party package installation is needed. Tkinter is part of most standard Windows Python installations.
+
+## Run on macOS or Linux
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python main.py
+```
+
+Some Linux distributions require the Tkinter system package first, for example `sudo apt install python3-tk`.
+
+To leave the virtual environment, run `deactivate`.
 
 ## Run the tests
 
+Run planner tests on any supported platform:
+
 ```bash
-python -m unittest discover -v
+python -m unittest discover -s tests -p "test_planner.py" -v
 ```
 
-The tests use temporary files, so they do not change your personal task list.
+Run desktop interaction tests on Windows (a graphical desktop is required):
+
+```bash
+python -m unittest discover -s tests -p "test_gui.py" -v
+```
+
+The tests use temporary files and a hidden test window, so they do not change your personal task list or display a normal app window.
 
 ## How your data is stored
 
@@ -60,7 +88,8 @@ studysprint-gui/
 │   └── gui.py
 ├── tests/
 │   ├── __init__.py
-│   └── test_planner.py
+│   ├── test_planner.py
+│   └── test_gui.py
 ├── .gitignore
 ├── LICENSE
 └── README.md
