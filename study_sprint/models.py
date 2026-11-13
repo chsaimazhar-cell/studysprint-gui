@@ -19,30 +19,44 @@ class Task:
     completed: bool = False
 
     def __post_init__(self) -> None:
-        self.title = self.title.strip()
-        self.priority = self.priority.title()
-
-        if self.id < 1:
+        if not isinstance(self.title, str):
+            raise ValueError("Task title must be text.")
+        if isinstance(self.id, bool) or not isinstance(self.id, int) or self.id < 1:
             raise ValueError("Task ID must be a positive number.")
+        self.title = self.title.strip()
+        if not isinstance(self.priority, str):
+            raise ValueError("Priority must be Low, Medium, or High.")
+        self.priority = self.priority.title()
         if not self.title:
             raise ValueError("Task title cannot be empty.")
         if self.priority not in VALID_PRIORITIES:
             raise ValueError("Priority must be Low, Medium, or High.")
+        if not isinstance(self.due_date, str):
+            raise ValueError("Due date must be text in YYYY-MM-DD format.")
         if self.due_date:
             try:
-                datetime.strptime(self.due_date, "%Y-%m-%d")
+                parsed_date = datetime.strptime(self.due_date, "%Y-%m-%d")
+                if parsed_date.strftime("%Y-%m-%d") != self.due_date:
+                    raise ValueError
             except ValueError as exc:
                 raise ValueError("Due date must use YYYY-MM-DD format.") from exc
+        if not isinstance(self.completed, bool):
+            raise ValueError("Completed status must be true or false.")
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)
 
     @classmethod
     def from_dict(cls, data: dict[str, Any]) -> "Task":
+        if not isinstance(data, dict):
+            raise ValueError("Each saved task must be a JSON object.")
+        completed = data.get("completed", False)
+        if not isinstance(completed, bool):
+            raise ValueError("Saved task completion status must be true or false.")
         return cls(
             id=int(data["id"]),
             title=str(data["title"]),
             priority=str(data.get("priority", "Medium")),
             due_date=str(data.get("due_date", "")),
-            completed=bool(data.get("completed", False)),
+            completed=completed,
         )
