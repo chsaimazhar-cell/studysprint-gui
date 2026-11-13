@@ -46,7 +46,11 @@ class StudyPlanner:
         next_id = max((task.id for task in self.tasks), default=0) + 1
         task = Task(next_id, title, priority, due_date)
         self.tasks.append(task)
-        self._save()
+        try:
+            self._save()
+        except OSError:
+            self.tasks.pop()
+            raise
         return task
 
     def list_tasks(self) -> list[Task]:
@@ -57,7 +61,11 @@ class StudyPlanner:
         if task.completed:
             raise ValueError("This task is already completed.")
         task.completed = True
-        self._save()
+        try:
+            self._save()
+        except OSError:
+            task.completed = False
+            raise
         return task
 
     def reopen_task(self, task_id: int) -> Task:
@@ -65,13 +73,22 @@ class StudyPlanner:
         if not task.completed:
             raise ValueError("This task is already active.")
         task.completed = False
-        self._save()
+        try:
+            self._save()
+        except OSError:
+            task.completed = True
+            raise
         return task
 
     def delete_task(self, task_id: int) -> Task:
         task = self._find_task(task_id)
+        original_index = self.tasks.index(task)
         self.tasks.remove(task)
-        self._save()
+        try:
+            self._save()
+        except OSError:
+            self.tasks.insert(original_index, task)
+            raise
         return task
 
     def _find_task(self, task_id: int) -> Task:
