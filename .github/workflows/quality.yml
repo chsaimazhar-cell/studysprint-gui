@@ -1,0 +1,37 @@
+name: Python and GUI checks
+
+on:
+  push:
+    branches: [main, "maintenance/**"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  planner-tests:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python-version: ["3.10", "3.12", "3.13"]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Compile source
+        run: python -m compileall -q .
+      - name: Run planner tests
+        run: python -m unittest discover -s tests -p "test_planner.py" -v
+
+  windows-gui-smoke:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Compile source
+        run: python -m compileall -q .
+      - name: Run Tkinter interaction tests
+        run: python -m unittest discover -s tests -p "test_gui.py" -v
